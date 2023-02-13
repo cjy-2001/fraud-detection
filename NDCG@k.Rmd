@@ -1,0 +1,147 @@
+---
+title: "NDCG@k"
+author: "Jiayi Chen"
+output: html_document
+---
+
+# Rewrite the funciton: k predictedprobability truelabel; 
+# Add comments 
+# FUNCTION: this calculates NDCG@k
+# INPUT: ..
+# OUTPUT: ..
+
+# Create a testset and ran in the R markdown 
+# Assess the Evaluation.NDCG
+# Test function by writing real numbers and use k = total length 
+
+# Reading: paragraph adaBoost: https://mitpress.mit.edu/sites/default/files/titles/content/boosting_foundations_algorithms/chapter001.html
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(broom)
+library(ISLR)
+library(pROC)
+#library(StatRank)
+```
+
+```{r, message=FALSE}
+home <- read_csv("uscecchini28.csv")
+
+split_train_test <- function (year, data) {
+  train <<- data %>%
+    filter(fyear <= year - 2)
+
+  test <<- data %>%
+    filter(fyear == year)
+}
+
+split_train_test(2008, home)
+```
+
+# NDCG@k
+NDCG: This function calculates the Normalized Discounted Cumulative Gain (NDCG), which is a measure of ranking quality. This metric takes position significance into account, and NDCG is computed as the ratio between Discounted Cumulative Gain(DCG) and idealized Discounted Cumulative Gain(iDCG). This function also requires the user to enter the value of k, which represents the number of top observations that should be used for calculation. 
+
+NDCG2: Similar to NDCG, this function calculates the Normalized Discounted Cumulative Gain. The difference between NDCG and NDCG2 is that the latter is more concise with the use of a new function named DCG (the formula for calculating the DCG score).
+
+Both of them have 3 inputs: 
+  k: the number of observations that you want to include in computing NDCG score. Those           observations generally have the highest predicted probabilities (or highest rankings)
+  Relevance: an ideal list of relevance score of the document
+  Predicted: a list of relevance score ranked by predicted probability 
+
+Output: 
+  NDCG@k, which is (DCG@k)/(ideal DCG@k)
+  
+```{r First NDCG Function}
+NDCG <- function (k, Relevance, Predicted) {
+# Calculate DCG@K
+  DCGk <- 0
+  for (i in 1:k){
+    # Assign each observation's relevance value
+    rel <- Predicted[i]
+    # Sum up DCG values 
+    DCGk = DCGk +(2^(rel) - 1)/(log2(i + 1))
+  }
+
+# Calculate ideal DCG@K
+  iDCGk <- 0
+  for (j in 1:k){
+    # Similar to the previous for loop, we want to assign each observation's relevance value, except in this case all relevance scores are already ranked from highest to lowest (because it's ideal)
+    rel <- Relevance[j]
+    iDCGk = iDCGk +(2^(rel) - 1)/(log2(j + 1))
+  }
+  
+  # Print out DCG@k and iDCG@k values
+  cat("DCG of the predicted order is", DCGk, "\nDCG of the ideal order(iDCG) is", iDCGk, "\n")
+  # Compute NDCG@k
+  return(DCGk/iDCGk)
+}
+```
+
+```{r Second NDCG Function}
+# First, define a function DCG which can calculate the DCG score
+DCG <- function (k, ranking){
+  DCG <- 0
+  for (i in 1:k){
+  DCG = DCG +(2^(ranking[i]) - 1)/(log2(i + 1))
+  }
+  return(DCG)
+}
+
+# Then implement the DCG function into the main NDCG function
+NDCG2 <- function (k, Relevance, Predicted) {
+# Calculate DCG@K
+  DCGk <- DCG(k, Predicted)
+
+# Calculate ideal DCG@K
+  iDCGk <- DCG(k, Relevance)
+
+  cat("DCG of the predicted order is", DCGk, "\nDCG of the ideal order(iDCG) is", iDCGk, "\n")
+  return(DCGk/iDCGk)
+}
+```
+
+# Create a testset and ran in the R markdown
+```{r}
+test_predicted <- c(3, 5, 1, 3, 1)
+test_ideal <- c(5, 3, 3, 1, 1)
+
+# Compute each value manually (k = 4)
+test_DCG <- (2^3 - 1)/log2(1 + 1) + (2^5 - 1)/log2(1 + 2) + (2^1 - 1)/log2(1 + 3) + (2^3 - 1)/log2(1 + 4)
+test_iDCG <- (2^5 - 1)/log2(1 + 1) + (2^3 - 1)/log2(1 + 2) + (2^3 - 1)/log2(1 + 3) + (2^1 - 1)/log2(1 + 4)
+cat(test_DCG, test_iDCG, sep = "\n")
+
+# Compute each value by using function  
+NDCG(4, test_ideal, test_predicted)
+NDCG2(4, test_ideal, test_predicted)
+
+# They match each other!
+```
+# Assess the Evaluation.NDCG
+```{r, message=FALSE, warning=FALSE}
+library(StatRank)
+NDCG(length(PredictedRank), RelevanceLevel, PredictedRank)
+Evaluation.NDCG(order(testpred$pred), PredictedRank)
+```
+
+# Apply to the Fraud's data, choosing year 2008 as testset
+```{r}
+# Adding prediction to a test set
+default_model <- glm(formula = misstate ~ act + ap + at + ceq + che + cogs + csho +   dlc + dltis + dltt + ib + invt + ivao + ivst + lct + lt + ppegt + pstk + rect + sale + sstk + txp + prcc_f, data = train, family = "binomial") 
+
+# In this case, k = the number of top 1% firms in a test year
+k <- floor(0.01*nrow(test))
+
+# Ideal order
+RelevanceLevel <- sort(test$misstate, decreasing = TRUE)
+
+# Recommendations order
+testpred <- test %>% 
+    mutate(pred = pred_prob <- predict(default_model, newdata = test, type = "response")) %>%
+    arrange(desc(pred))
+PredictedRank <- testpred$misstate
+
+NDCG(k, RelevanceLevel, PredictedRank)
+NDCG2(k, RelevanceLevel, PredictedRank)
+
+# The logit method's NDCG@k value from the paper is 0.028
+```
