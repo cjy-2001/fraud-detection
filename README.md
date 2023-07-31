@@ -38,11 +38,11 @@ Rscript -e "install.packages(c('package1', 'package2'))"
 
 ## RUSBoost
 
--Why do we need RUSBoost?
+- Why do we need RUSBoost?
 
 It is common to have largely skewed training data. In our case, the fraud firms are unevenly represented, and model constructed with the goal of detecting a can achieve a correct classification rate of 99% by classifying all firms as being non-fraud. However, that model is meaningless to us as our goal is to identify fraudulent firms as much as possible.
 
--How does RUSBoost work?
+- How does RUSBoost work?
 
 It combines both Data Resampling and Boosting (ensemble learning) techniques. As for the Data Reseampling, RUSBoost implements Undersampling technique, which means removing examples from the majority class. Meanwhile, RUSBoost uses Adaptive Boosting (Adaboosting). The Adaboosting mechanism works as following: as initial learners are weak, subsequent ones can be tweaked in favor for those wrongly identified observations; and then it combines the result of multiple “weak learners” based on weight. 
 
