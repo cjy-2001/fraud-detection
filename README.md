@@ -6,7 +6,7 @@
 
 ## Table of Contents
 - [Background](#background)
-- [Install](#install)
+- [Installation](#installation)
 - [Project Overview](#project-overview)
 - [RUSBoost](#rusboost)
 - [Result](#result)
@@ -16,7 +16,7 @@
 
 This project is inspired by a study aimed at developing a novel out-of-sample fraud prediction model using ensemble learning techniques. Previous studies have focused on publicly traded U.S. firms' sample data over the period 1991–2008. The dataset was split into training and testing sets to maintain the model's intertemporal nature. In addition to their own prediction model derived from the RUSBoost method, they evaluated two benchmark models. One is a logistic regression model, and the other is a support vector machine model from Cecchini et al[1]. By implementing AUC and NDCG@k performance evaluation metrics, they demonstrated that their proposed RUSBoost model could yield more reliable predictions.
 
-## Install
+## Installation
 
 To set up this project, clone the repository and install the required R packages:
 
