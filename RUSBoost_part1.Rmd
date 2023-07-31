@@ -1,0 +1,258 @@
+```{r message=FALSE, warning=FALSE}
+#setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+library(tidyverse)
+library(rusboost)
+library(rpart)
+suppressPackageStartupMessages(library(ISLR))
+suppressPackageStartupMessages(library(pROC))
+#library(rattle)
+#library(ebmc)
+#Package ‘ebmc’ was removed from the CRAN repository.
+#Archived on 2021-03-16 as requires archived package 'DMwR'
+```
+
+```{r, message=FALSE}
+load("C:/Users/cjy2001/OneDrive - Middlebury College/Middlebury Academic/Fall 2021/Project/11.4.RData")
+data <- read_csv("uscecchini28.csv")
+data$misstate <- factor(data$misstate)
+```
+
+```{r Creating data}
+split_train_test <- function (year, data) {
+  train <<- data %>%
+    filter(fyear <= year - 2)
+  test <<- data %>%
+    filter(fyear == year)
+}
+
+split_train_test(2003, data)
+train_3 <- train
+test_3 <- test
+split_train_test(2004, data)
+train_4 <- train
+test_4 <- test
+split_train_test(2005, data)
+train_5 <- train
+test_5 <- test
+split_train_test(2006, data)
+train_6 <- train
+test_6 <- test
+split_train_test(2007, data)
+train_7 <- train
+test_7 <- test
+split_train_test(2008, data)
+train_8 <- train
+test_8 <- test
+# How to rename them by using for loop?
+# Importance of dealing with serial fraud in fraud prediction models.
+# The value of model6 is too strange (too many predicted fraud)
+# Error: cannot allocate vector of size 1.3 Gb
+```
+
+We find that our best model, the ensemble learning model, identified a total of 16 fraud cases in the test period 2003–2008. In contrast, the comparable figure is 9 for the Dechow et al. model and 7 for the Cecchini et al. model. These results suggest that the differences in the performance of the ensemble learning model versus the two benchmark models are also economically significant.
+
+p.207: We construct our RUSBoost model by setting this ratio at 1:1. That is, we simply sample the same number of fraud observations and non-fraudulent observations.\
+p.223: We set the number of trees to 3,000.\
+p.223: We set the parameter “minleaf” (minimum required number of samples at a tree leaf) to 5.
+
+
+```{r}
+set.seed(5)
+#.Random.seed  Check seed is the same
+year4_time_3000 <- system.time(year4_model_3000 <- rusb(formula = misstate ~ act + ap + at + ceq + che + cogs + csho + dlc + dltis + dltt + dp
+              + ib + invt + ivao + ivst + lct + lt + ni + ppegt + pstk + + re + rect + sale + sstk + txp + txt + xint + 
+                prcc_f,
+              data = train_4,
+              boot = FALSE,
+              iters = 3000, 
+              control = rpart.control(minsplit = 5),
+              sampleFraction = 0.5,
+              idx = train_4$misstate == 0)
+)
+
+year5_time_3000 <- system.time(year5_model_3000 <- rusb(formula = misstate ~ act + ap + at + ceq + che + cogs + csho + dlc + dltis + dltt + dp
+              + ib + invt + ivao + ivst + lct + lt + ni + ppegt + pstk + + re + rect + sale + sstk + txp + txt + xint + 
+                prcc_f,
+              data = train_5,
+              boot = FALSE,
+              iters = 3000, 
+              control = rpart.control(minsplit = 5),
+              sampleFraction = 0.5,
+              idx = train_5$misstate == 0)
+)
+
+year6_time_3000 <- system.time(year6_model_3000 <- rusb(formula = misstate ~ act + ap + at + ceq + che + cogs + csho + dlc + dltis + dltt + dp
+              + ib + invt + ivao + ivst + lct + lt + ni + ppegt + pstk + + re + rect + sale + sstk + txp + txt + xint + 
+                prcc_f,
+              data = train_6,
+              boot = FALSE,
+              iters = 3000, 
+              control = rpart.control(minsplit = 5),
+              sampleFraction = 0.5,
+              idx = train_6$misstate == 0)
+)
+```
+
+```{r,eval=FALSE}
+# These are all for year 2003.
+set.seed(5)
+
+time_5000 <- system.time(model_5000 <- rusb(formula = misstate ~ act + ap + at + ceq + che + cogs + csho + dlc + dltis + dltt + dp
+              + ib + invt + ivao + ivst + lct + lt + ni + ppegt + pstk + + re + rect + sale + sstk + txp + txt + xint + 
+                prcc_f,
+              data = train_3,
+              boot = FALSE,
+              iters = 5000, 
+              control = rpart.control(minsplit = 5),
+              sampleFraction = 0.5,
+              idx = train_3$misstate == 0)
+)
+
+time_3000 <- system.time(model_3000 <- rusb(formula = misstate ~ act + ap + at + ceq + che + cogs + csho + dlc + dltis + dltt + dp
+              + ib + invt + ivao + ivst + lct + lt + ni + ppegt + pstk + + re + rect + sale + sstk + txp + txt + xint + 
+                prcc_f,
+              data = train,
+              boot = FALSE,
+              iters = 3000, 
+              control = rpart.control(minsplit = 5),
+              sampleFraction = 0.5,
+              idx = train$misstate == 0)
+)
+
+time_1500 <- system.time(model_1500 <- rusb(formula = misstate ~ act + ap + at + ceq + che + cogs + csho + dlc + dltis + dltt + dp
+              + ib + invt + ivao + ivst + lct + lt + ni + ppegt + pstk + + re + rect + sale + sstk + txp + txt + xint + 
+                prcc_f,
+              data = train,
+              boot = FALSE,
+              iters = 1500, 
+              control = rpart.control(minsplit = 5),
+              sampleFraction = 0.5,
+              idx = train$misstate == 0)
+)
+
+time_500 <- system.time(model_500 <- rusb(formula = misstate ~ act + ap + at + ceq + che + cogs + csho + dlc + dltis + dltt + dp
+              + ib + invt + ivao + ivst + lct + lt + ni + ppegt + pstk + + re + rect + sale + sstk + txp + txt + xint + 
+                prcc_f,
+              data = train,
+              boot = FALSE,
+              iters = 500, 
+              control = rpart.control(minsplit = 5),
+              sampleFraction = 0.5,
+              idx = train$misstate == 0)
+)
+
+time_200 <- system.time(model_200 <- rusb(formula = misstate ~ act + ap + at + ceq + che + cogs + csho + dlc + dltis + dltt + dp
+              + ib + invt + ivao + ivst + lct + lt + ni + ppegt + pstk + + re + rect + sale + sstk + txp + txt + xint + 
+                prcc_f,
+              data = train,
+              boot = FALSE,
+              iters = 200, 
+              control = rpart.control(minsplit = 5),
+              sampleFraction = 0.5,
+              idx = train$misstate == 0)
+)
+```
+
+model_100 takes 800 seconds\
+model_200 takes 1650/1800 seconds\
+model_500 takes 3200/3600 seconds\
+model_1500 takes 7500/7000 seconds\
+model_3000 takes 17000 seconds\
+year4_model_3000 takes 15000 seconds\
+year5_model_3000 takes 15000 seconds\
+year6_model_3000 takes 2700 seconds??\
+
+```{r Prediction, eval=FALSE}
+preds_100 <- predict.rusb(year3_model_100, data.frame(test_3))
+preds_200 <- predict.rusb(model_200, data.frame(test))
+preds_500 <- predict.rusb(model_500, data.frame(test))
+preds_1500 <- predict.rusb(model_1500, data.frame(test))
+preds_3000 <- predict.rusb(model_3000, data.frame(test))
+```
+
+```{r AUC}
+auc <- NULL
+x <- list(preds_200, preds_500, preds_1500, preds_3000)
+
+for (i in 1:4){
+roc_obj <- roc(predictor = x[[i]]$prob[,2], 
+               response = test$misstate)
+
+#plot(roc_obj, legacy.axes = TRUE)
+auc[i] = auc(roc_obj)
+}
+
+auc
+```
+
+```{r Confusion Sensitivity Precision}
+# Sensitivity TP/P = TP/(TP + FN) 
+# Precision TP/TP+FP
+sensitivity <- NULL
+precision <- NULL
+
+for (i in 1:4) {
+  print(x[[i]]$confusion)
+  sensitivity[i] <- x[[i]]$confusion[2,2]/sum(x[[i]]$confusion[,2])
+  precision[i] <- x[[i]]$confusion[2,2]/sum(x[[i]]$confusion[2,])
+}
+
+sensitivity
+precision
+```
+
+```{r}
+year3_preds_3000 <- predict.rusb(year3_model_3000, data.frame(test_3))
+year4_preds_3000 <- predict.rusb(year4_model_3000, data.frame(test_4))
+year5_preds_3000 <- predict.rusb(year5_model_3000, data.frame(test_5))
+year6_preds_3000 <- predict.rusb(year6_model_3000, data.frame(test_6))
+
+yearly_test_set <- list(test_3,test_4,test_5,test_6)
+yearly_preds <- list(year3_preds_3000,year4_preds_3000,year5_preds_3000,year6_preds_3000)
+yearly_sensitivity <- NULL
+yearly_precision <- NULL
+yearly_auc <- NULL
+
+for (i in 1:4) {
+  roc_obj <- roc(predictor = yearly_preds[[i]]$prob[,2], 
+               response = yearly_test_set[[i]]$misstate)
+  print(yearly_preds[[i]]$confusion)
+  yearly_sensitivity[i] <-
+    yearly_preds[[i]]$confusion[2,2]/sum(yearly_preds[[i]]$confusion[,2])
+  yearly_precision[i] <- yearly_preds[[i]]$confusion[2,2]/sum(yearly_preds[[i]]$confusion[2,])
+  yearly_auc[i] = auc(roc_obj)
+}
+mean(yearly_auc)
+mean(yearly_precision)
+mean(yearly_sensitivity)
+```
+
+```{r}
+set.seed(5)
+year6_time_3000_2 <- system.time(year6_model_3000_2 <- rusb(formula = misstate ~ act + ap + at + ceq + che + cogs + csho + dlc + dltis + dltt + dp
+              + ib + invt + ivao + ivst + lct + lt + ni + ppegt + pstk + + re + rect + sale + sstk + txp + txt + xint + 
+                prcc_f,
+              data = train_6,
+              boot = FALSE,
+              iters = 3000, 
+              control = rpart.control(minsplit = 5),
+              sampleFraction = 0.5,
+              idx = train_6$misstate == 0)
+)
+```
+
+```{r}
+test_8 %>% 
+  count(misstate == 1)
+test_7 %>% 
+  count(misstate == 1)
+test_6 %>% 
+  count(misstate == 1)
+test_5 %>% 
+  count(misstate == 1)
+test_4 %>% 
+  count(misstate == 1)
+```
+
+
+

@@ -1,7 +1,7 @@
 library(tidyverse)
 library(rusboost)
 library(pROC)
-load("C:/Users/cjy2001/OneDrive - Middlebury College/Middlebury Academic/Fall 2021/Project/Final_Data.RData")
+# load("/Final_Data.RData")
 
 # Plot all predictors and see if it changes dramatically in year 2008 (for loop one by one)
 # Add some comments for for loops 

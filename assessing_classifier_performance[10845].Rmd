@@ -1,0 +1,83 @@
+---
+title: "Confusion Matrix, ROC Curves, and AUC (Chapter 4)"
+output: html_document
+---
+
+```{r libraries,message=FALSE,warning=FALSE}
+library(tidyverse)
+library(ISLR)
+library(pROC) 
+```
+
+Data on credit card payment default:
+
+```{r load data}
+data("Default")
+```
+
+## Assessing Classifier Performance
+
+```{r split into train and test sets}
+set.seed(1)
+n <- nrow(Default)
+train_indices <- sample(1:n, size = floor(0.7*n))
+train_set <- Default[train_indices,]
+test_set <- Default[-train_indices,]
+
+m <- glm(default ~ balance + income + student, train_set, family = binomial)
+```
+
+```{r confusion matrix}
+# Get all the fitted class labels on the test set
+pred_prob <- predict(m, newdata = test_set, type = "response") # predicted probabilities
+pred_class_labels <- ifelse(pred_prob > 0.5, "Yes", "No") # convert to labels
+
+# Make confusion matrix using table()
+# predictions on rows, true labels on columns
+conf_mtx <- table(pred_class_labels, test_set$default)
+conf_mtx
+```
+
+**Accuracy** = percentage of observations that were correctly labeled (i.e., overall error rate)
+
+```{r compute accuracy}
+# (2896 + 21)/(2896 + 81 + 2 + 21)
+sum(diag(conf_mtx))/sum(conf_mtx)
+```
+
+### Class-Specific Performance
+
+You might be particularly interested in whether your model correctly identifies observations *in a particular class*.  
+
+**Sensitivity** = percentage of true defaulters who were correctly labeled (aka **true positive rate**)
+
+```{r compute sensitivity}
+# TP/P = TP/(TP + FN) 
+# 21/(21 + 81)
+conf_mtx[2,2]/sum(conf_mtx[,2])
+```
+
+**Specificity** = percentage of true non-defaulters who were correctly labeled (aka **true negative rate**)
+
+```{r compute specificity}
+# TN/N = TN/(TN + FP)
+# 2896/(2896 + 2)
+conf_mtx[1,1]/sum(conf_mtx[,1])
+```
+
+Why is accuracy so high but sensitivity so low?
+
+### ROC Curve
+
+```{r plot ROC}
+# roc() function comes with the pROC package
+roc_obj <- roc(predictor = pred_prob, 
+               response = test_set$default)
+plot(roc_obj, legacy.axes = TRUE)
+```
+
+```{r compute AUC}
+# auc() function comes with the pROC package
+auc(roc_obj)
+```
+
