@@ -2,7 +2,7 @@
 
 [![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
 
-> This project focuses on building a machine learning model to detect fraudulent transactions. Various techniques are utilized, and the model's performance is evaluated based on precision, recall, and the area under the ROC curve.
+> This project focuses on building a machine learning model to detect fraudulent publicly traded U.S. firms. Various techniques are utilized, and the model's performance is evaluated based on precision, recall, and the area under the ROC curve.
 
 ## Table of Contents
 - [Background](#background)
@@ -14,7 +14,7 @@
 
 ## Background
 
-This project is inspired by a study aimed at developing a novel out-of-sample fraud prediction model using ensemble learning techniques. The authors of the study focused on publicly traded U.S. firms' sample data over the period 1991–2008. The dataset was split into training and testing sets to maintain the model's intertemporal nature. In addition to their own prediction model derived from the RUSBoost method, they evaluated two benchmark models. One is a logistic regression model from Dechow et al., and the other is a support vector machine model from Cecchini et al. By implementing AUC and NDCG@k performance evaluation metrics, they demonstrated that their proposed model could yield more reliable predictions.
+This project is inspired by a study aimed at developing a novel out-of-sample fraud prediction model using ensemble learning techniques. Previous studies have focused on publicly traded U.S. firms' sample data over the period 1991–2008. The dataset was split into training and testing sets to maintain the model's intertemporal nature. In addition to their own prediction model derived from the RUSBoost method, they evaluated two benchmark models. One is a logistic regression model, and the other is a support vector machine model from Cecchini et al[1]. By implementing AUC and NDCG@k performance evaluation metrics, they demonstrated that their proposed RUSBoost model could yield more reliable predictions.
 
 ## Install
 
@@ -56,5 +56,7 @@ The general trend is that the overall accuracy rate declines over the years, but
 
 ## References
 
-[1] Y. Bao, B. Ke, B. Li, J. Yu, and J. Zhang, "Detecting Accounting Fraud in Publicly Traded U.S. Firms Using a Machine Learning Approach," Journal of Accounting Research, vol. 58, no. 1, pp. 199-235, 2020.<br />
-[2] C. Seiffert, T. M. Khoshgoftaar, J. Van Hulse, and A. Napolitano, "RUSBoost: Improving Classification Performance when Training Data is Skewed," Florida Atlantic University, Boca Raton, Florida, USA, n.d.<br />
+[1] M. Cecchini, H. Aytug, G. J. Koehler, and P. Pathak, "A Support Vector Machine-Based Model for Detecting Top Management Fraud," in Proceedings of the 45th Annual Hawaii International Conference on System Sciences, 2012.<br />
+[2] Y. Bao, B. Ke, B. Li, J. Yu, and J. Zhang, "Detecting Accounting Fraud in Publicly Traded U.S. Firms Using a Machine Learning Approach," Journal of Accounting Research, vol. 58, no. 1, pp. 199-235, 2020.<br />
+[3] C. Seiffert, T. M. Khoshgoftaar, J. Van Hulse, and A. Napolitano, "RUSBoost: Improving Classification Performance when Training Data is Skewed," Florida Atlantic University, Boca Raton, Florida, USA, n.d.<br />
+[4] JarFraud, "FraudDetection," GitHub, no commit ID given. [Online]. Available: https://github.com/JarFraud/FraudDetection.
